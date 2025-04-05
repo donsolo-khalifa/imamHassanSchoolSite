@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const navMenu = document.querySelector('.nav-menu');
     const navLinks = document.querySelectorAll('.nav-link');
     const backToTopButton = document.getElementById('back-to-top');
+    // Query all sections that have an ID attribute to be tracked for nav highlighting
     const sections = document.querySelectorAll('section[id]');
     const animateElements = document.querySelectorAll('.animate-on-scroll');
 
@@ -20,7 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Close mobile menu when a link is clicked
         navLinks.forEach(link => {
             link.addEventListener('click', () => {
-                if (navMenu.classList.contains('active')) {
+                // Check if the menu is active AND the click is on a link (not the toggle itself)
+                if (navMenu.classList.contains('active') && link.closest('.nav-menu')) {
                     navMenu.classList.remove('active');
                     mobileMenuToggle.classList.remove('active');
                 }
@@ -31,11 +33,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Sticky Navbar & Active Link Highlighting ---
     const handleScroll = () => {
         const scrollY = window.scrollY;
+        const navHeight = navbar ? navbar.offsetHeight : 70; // Fallback height
 
         // Sticky Navbar
-        if (navbar) {
+        if (navbar && navbar.parentElement) { // Check parentElement exists
             if (scrollY > 50) {
-                navbar.parentElement.classList.add('scrolled'); // Add scrolled class to header
+                navbar.parentElement.classList.add('scrolled');
             } else {
                 navbar.parentElement.classList.remove('scrolled');
             }
@@ -44,25 +47,36 @@ document.addEventListener('DOMContentLoaded', () => {
         // Active Nav Link Highlighting
         let currentSectionId = '';
         sections.forEach(section => {
-            const sectionTop = section.offsetTop - navbar.offsetHeight - 50; // Adjusted offset
-            const sectionHeight = section.offsetHeight;
+            // Adjust offset calculation to trigger highlight slightly earlier
+            const sectionTop = section.offsetTop - navHeight - 50;
+            const sectionBottom = sectionTop + section.offsetHeight;
 
-            if (scrollY >= sectionTop && scrollY < sectionTop + sectionHeight) {
+            // Check if current scroll position is within the section boundaries
+            if (scrollY >= sectionTop && scrollY < sectionBottom) {
                 currentSectionId = section.getAttribute('id');
             }
         });
 
+         // If scrolled to the very top, activate 'Home'
+        if (scrollY < sections[0].offsetTop - navHeight - 50) {
+             currentSectionId = 'home';
+        }
+         // If scrolled to the very bottom, ensure the last section's link is active
+        if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 50) { // Near bottom
+            currentSectionId = sections[sections.length - 1].getAttribute('id');
+        }
+
+
         navLinks.forEach(link => {
             link.classList.remove('active');
-            // Check if the link's href matches the current section OR if it's the home link and we are near the top
-            if (link.getAttribute('href') === `#${currentSectionId}` || (currentSectionId === '' && scrollY < 200 && link.getAttribute('href') === '#home')) {
-                link.classList.add('active');
-            }
-             // Highlight 'Enroll Now' if enrollment section is active
-            if (currentSectionId === 'enrollment' && link.classList.contains('cta')) {
-                // Keep the default CTA style, don't add 'active' underline style
-            } else if (link.getAttribute('href') === `#${currentSectionId}`) {
-                 link.classList.add('active');
+            const linkHref = link.getAttribute('href');
+
+            // Check if the link's href corresponds to the current section ID
+            if (linkHref === `#${currentSectionId}`) {
+                 // Special handling for CTA button - don't add 'active' class styling
+                 if (!link.classList.contains('cta')) {
+                    link.classList.add('active');
+                 }
             }
         });
 
@@ -99,15 +113,17 @@ document.addEventListener('DOMContentLoaded', () => {
     let slideInterval;
 
     function showSlide(index) {
+         if (!slides || slides.length === 0 || !dots || dots.length === 0) return; // Guard clause
+
         slides.forEach((slide, i) => {
             slide.classList.remove('active');
-            dots[i].classList.remove('active');
+            if(dots[i]) dots[i].classList.remove('active'); // Check if dot exists
         });
 
         currentSlide = (index + slides.length) % slides.length; // Wrap around
 
-        slides[currentSlide].classList.add('active');
-        dots[currentSlide].classList.add('active');
+        if(slides[currentSlide]) slides[currentSlide].classList.add('active');
+        if(dots[currentSlide]) dots[currentSlide].classList.add('active');
 
         resetInterval(); // Reset auto-play timer on manual interaction
     }
@@ -121,8 +137,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function startInterval() {
-        clearInterval(slideInterval); // Clear existing interval before starting new one
-         slideInterval = setInterval(nextSlide, 6000); // Change slide every 6 seconds
+        clearInterval(slideInterval); // Clear existing interval
+         // Only start if there's more than one slide
+        if (slides && slides.length > 1) {
+            slideInterval = setInterval(nextSlide, 6000); // Change slide every 6 seconds
+        }
     }
 
     function resetInterval() {
@@ -140,7 +159,9 @@ document.addEventListener('DOMContentLoaded', () => {
         dots.forEach(dot => {
             dot.addEventListener('click', (e) => {
                 const slideIndex = parseInt(e.target.getAttribute('data-slide'));
-                showSlide(slideIndex);
+                if (!isNaN(slideIndex)) { // Ensure it's a valid number
+                     showSlide(slideIndex);
+                }
             });
         });
 
@@ -151,21 +172,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Scroll Animations (Intersection Observer) ---
     const observerOptions = {
-        root: null, // relative to document viewport
+        root: null,
         rootMargin: '0px',
-        threshold: 0.1 // trigger when 10% of the element is visible
+        threshold: 0.1 // 10% visible
     };
 
     const observerCallback = (entries, observer) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 entry.target.classList.add('visible');
-                observer.unobserve(entry.target); // Optional: Stop observing once visible
+                observer.unobserve(entry.target); // Stop observing once visible
             }
-            // Optional: Remove 'visible' class if element scrolls out of view
-            // else {
-            //     entry.target.classList.remove('visible');
-            // }
         });
     };
 
@@ -177,28 +194,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Form Submission Handling (Placeholder) ---
     const infoRequestForm = document.getElementById('info-request-form');
-    const newsletterForm = document.querySelector('.newsletter-form'); // Select by class
+    const newsletterForm = document.querySelector('.newsletter-form');
 
     if (infoRequestForm) {
         infoRequestForm.addEventListener('submit', (e) => {
-            e.preventDefault(); // Prevent actual form submission
+            e.preventDefault();
             console.log('Info request form submitted (placeholder).');
-            // Add validation or actual submission logic here (e.g., using fetch)
-            alert('Thank you for your request! We will be in touch soon.'); // Simple feedback
-            infoRequestForm.reset(); // Clear the form
+            // You would typically send form data to a server here using fetch()
+            alert('Thank you for your request! We will be in touch soon.');
+            infoRequestForm.reset();
         });
     }
 
      if (newsletterForm) {
         newsletterForm.addEventListener('submit', (e) => {
-            e.preventDefault(); // Prevent actual form submission
+            e.preventDefault();
             const emailInput = newsletterForm.querySelector('input[type="email"]');
-            console.log(`Newsletter subscription attempt for: ${emailInput.value} (placeholder).`);
-            // Add validation or actual submission logic here
-            alert('Thank you for subscribing to our newsletter!'); // Simple feedback
-            newsletterForm.reset(); // Clear the form
+            console.log(`Newsletter subscription attempt for: ${emailInput ? emailInput.value : 'N/A'} (placeholder).`);
+             // You would typically send form data to a server here using fetch()
+            alert('Thank you for subscribing to our newsletter!');
+            newsletterForm.reset();
         });
     }
-
 
 }); // End DOMContentLoaded
