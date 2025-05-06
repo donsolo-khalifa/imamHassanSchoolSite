@@ -193,18 +193,67 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- Form Submission Handling (Placeholder) ---
-    const infoRequestForm = document.getElementById('info-request-form');
+    // const infoRequestForm = document.getElementById('info-request-form');
+    
+    // if (infoRequestForm) {
+        //     infoRequestForm.addEventListener('submit', (e) => {
+            //         e.preventDefault();
+            //         console.log('Info request form submitted (placeholder).');
+            //         // You would typically send form data to a server here using fetch()
+            //         alert('Thank you for your request! We will be in touch soon.');
+            //         infoRequestForm.reset();
+            //     });
+            // }
+            
     const newsletterForm = document.querySelector('.newsletter-form');
 
-    if (infoRequestForm) {
-        infoRequestForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            console.log('Info request form submitted (placeholder).');
-            // You would typically send form data to a server here using fetch()
-            alert('Thank you for your request! We will be in touch soon.');
-            infoRequestForm.reset();
+            
+    // ========================================================
+    // --- NEW: Enroll Now Button & Payment Form Handling ---
+    // ========================================================
+    // Ensure this code runs primarily on courses.html where these elements exist
+
+    const enrollButtons = document.querySelectorAll('.enroll-button'); // Buttons with class="enroll-button"
+    const paymentFormSection = document.getElementById('payment-form-section'); // The section holding the iframe
+    const closeFormButton = document.getElementById('close-form-button'); // Optional close button
+
+    // Check if the necessary elements for this feature exist on the current page
+    if (enrollButtons.length > 0 && paymentFormSection) {
+        enrollButtons.forEach(button => {
+            button.addEventListener('click', function(event) {
+                event.preventDefault(); // Stop link navigation if href="#"
+
+                // Show the payment form section
+                paymentFormSection.style.display = 'block';
+
+                // Scroll down to the form smoothly
+                paymentFormSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                // Reminder: Make sure your Google Form asks which course the user is enrolling for,
+                // as all 'Enroll Now' buttons currently lead to this single form instance.
+            });
         });
+
+        // Add event listener for the close button (if it exists)
+        if (closeFormButton) {
+            closeFormButton.addEventListener('click', function() {
+                paymentFormSection.style.display = 'none'; // Hide the form section
+
+                // Optional: Scroll back up to the top of the courses list
+                // const coursesPageSection = document.getElementById('courses-page');
+                // if (coursesPageSection) {
+                //    coursesPageSection.scrollIntoView({ behavior: 'smooth' });
+                // }
+            });
+        }
     }
+    // --- End of Enroll Now Button Handling ---
+
+    // --- Check URL hash to auto-display payment form ---
+if (window.location.hash === '#payment-form-section' && paymentFormSection) {
+    paymentFormSection.style.display = 'block';
+    paymentFormSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 
      if (newsletterForm) {
         newsletterForm.addEventListener('submit', (e) => {

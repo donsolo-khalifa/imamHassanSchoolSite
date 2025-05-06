@@ -475,6 +475,7 @@
       min-height: 60px;
   }
   
+  
   /* --- Campus Section (About AAII) --- */
   .campus {
       background-color: var(--light-gray);
@@ -925,6 +926,16 @@
     margin-left: 8px;
     font-weight: 400;
 }
+
+/* Add this to your CSS file if needed */
+.lang-fr {
+    /* font-family: 'Your Chosen Font for French', sans-serif; */ /* Example */
+    font-size: 1.1rem;
+    color: var(--gray); /* Or your desired color */
+    display: inline-block;
+    margin-left: 8px;
+    font-weight: 400;
+  }
 
 /* Course Card Enhancements */
 .course-card h3 {
