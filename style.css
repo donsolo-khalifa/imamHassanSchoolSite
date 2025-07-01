@@ -995,6 +995,20 @@
     margin: 25px 0;
 }
 
+/* instructor image following course parent */
+.instructor-img {
+  display: block;                 /* make it block-level */
+  margin: 0 auto 1rem;            /* auto left/right, 1rem bottom */
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid var(--primary-color);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+
+
 .feature-item {
     background: var(--light-gray);
     padding: 15px;
