@@ -450,6 +450,7 @@
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
       transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
       border: 1px solid var(--border-color);
+      margin-top: 35px;
   }
   
   .course-card:hover {
@@ -994,6 +995,8 @@
     gap: 15px;
     margin: 25px 0;
 }
+
+
 
 /* instructor image following course parent */
 .instructor-img {
